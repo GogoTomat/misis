@@ -1,0 +1,11 @@
+[importlinter]
+root_package = modules
+
+[importlinter:contract:1]
+name = Orders must not import Payments internals
+type = forbidden
+source_modules =
+    modules.orders
+forbidden_modules =
+    modules.payments.repository
+allow_indirect_imports = True

@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+requests
+grpcio
+grpcio-tools
+graphene
+pyyaml

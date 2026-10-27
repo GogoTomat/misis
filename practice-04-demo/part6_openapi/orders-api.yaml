@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: Orders API
+  version: 1.0.0
+  description: Пример OpenAPI-спецификации для практики курса «Проектирование сервисных приложений»
+paths:
+  /orders:
+    get:
+      summary: Получить список заказов
+      responses:
+        '200':
+          description: Список заказов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+    post:
+      summary: Создать новый заказ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+      responses:
+        '201':
+          description: Заказ создан
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '422':
+          description: Ошибка валидации
+
+  /orders/{orderId}:
+    parameters:
+      - name: orderId
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Получить заказ по ID
+      responses:
+        '200':
+          description: Заказ найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Заказ не найден
+    put:
+      summary: Полностью заменить заказ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderReplace'
+      responses:
+        '200':
+          description: Заказ заменён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Заказ не найден
+    patch:
+      summary: Частично обновить заказ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderPatch'
+      responses:
+        '200':
+          description: Заказ обновлён
+        '404':
+          description: Заказ не найден
+        '422':
+          description: Нарушен инвариант (например, изменение уже отправленного заказа)
+    delete:
+      summary: Удалить заказ
+      responses:
+        '204':
+          description: Заказ удалён (идемпотентно — тот же ответ при повторном вызове)
+
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        product:
+          type: string
+        quantity:
+          type: integer
+        status:
+          type: string
+          enum: [DRAFT, CONFIRMED, PACKED, SHIPPED, DELIVERED]
+    OrderCreate:
+      type: object
+      required: [product, quantity]
+      properties:
+        product:
+          type: string
+        quantity:
+          type: integer
+    OrderReplace:
+      type: object
+      required: [product, quantity, status]
+      properties:
+        product:
+          type: string
+        quantity:
+          type: integer
+        status:
+          type: string
+    OrderPatch:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string

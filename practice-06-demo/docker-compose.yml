@@ -1,0 +1,30 @@
+services:
+  primary:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/init-primary.sh:/docker-entrypoint-initdb.d/01-init-primary.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U admin -d postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  replica:
+    image: postgres:16
+    user: postgres
+    environment:
+      PGPASSWORD: replicator
+    ports:
+      - "5433:5432"
+    depends_on:
+      primary:
+        condition: service_healthy
+    entrypoint: ["bash", "/replica-entrypoint.sh"]
+    volumes:
+      - ./docker/replica-entrypoint.sh:/replica-entrypoint.sh:ro
